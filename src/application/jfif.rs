@@ -1,4 +1,3 @@
-
 #[derive(Debug)]
 pub struct JFIF {
     version: String,

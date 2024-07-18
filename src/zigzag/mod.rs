@@ -35,19 +35,19 @@ impl Iterator for ZigZagScan {
             };
 
             if j == self.min || i == self.max {
-                if self.counter < self.size-1 {
+                if self.counter < self.size - 1 {
                     self.max += 1;
                 } else {
                     self.min += 1;
                 }
-                self.counter+=1;
+                self.counter += 1;
                 i = self.max;
                 j = self.min;
             } else {
                 i += 1;
                 j -= 1;
             }
-            
+
             if cnt % 2 == 0 {
                 (self.x, self.y) = (i, j);
             } else {
@@ -59,7 +59,7 @@ impl Iterator for ZigZagScan {
 }
 
 #[cfg(test)]
-mod tests{
+mod tests {
     #[test]
     fn test_zig_zag_scan_3x3() {
         let mut scan = super::ZigZagScan::new(3);

@@ -15,15 +15,15 @@ fn cc(i: usize, j: usize) -> f32 {
     }
 }
 
-impl DCT  {
+impl DCT {
     pub fn new() -> DCT {
         let mut tmp: [[[[f32; 8]; 8]; 8]; 8] = Default::default();
         for i in 0..8 {
             for j in 0..8 {
                 for x in 0..8 {
-                    let i_cos = ((2*i+1) as f32 * PI / 16.0 * x as f32).cos();
+                    let i_cos = ((2 * i + 1) as f32 * PI / 16.0 * x as f32).cos();
                     for y in 0..8 {
-                        let j_cos =((2*j+1) as f32 * PI / 16.0 * y as f32).cos();
+                        let j_cos = ((2 * j + 1) as f32 * PI / 16.0 * y as f32).cos();
                         tmp[i][j][x][y] = cc(x, y) * i_cos * j_cos / 4.0;
                     }
                 }
@@ -51,8 +51,8 @@ impl DCT  {
             for x in (0..8).step_by(2) {
                 let a = _mm256_load_ps(&self.idct2d_data[i][j][x][0]);
                 let b = _mm256_loadu_ps(&data[x][0]);
-                let c = _mm256_load_ps(&self.idct2d_data[i][j][x+1][0]);
-                let d = _mm256_loadu_ps(&data[x+1][0]);
+                let c = _mm256_load_ps(&self.idct2d_data[i][j][x + 1][0]);
+                let d = _mm256_loadu_ps(&data[x + 1][0]);
                 acc = _mm256_fmadd_ps(a, b, acc);
                 acc = _mm256_fmadd_ps(c, d, acc);
             }

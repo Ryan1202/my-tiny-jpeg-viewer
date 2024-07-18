@@ -1,4 +1,7 @@
-use std::{fs::File, io::{self, BufReader, Read, Seek}};
+use std::{
+    fs::File,
+    io::{self, BufReader, Read, Seek},
+};
 
 #[derive(Debug, Clone, Copy)]
 pub enum SegmentType {
@@ -30,10 +33,14 @@ pub enum SegmentErrorKind {
 
 impl Segment {
     fn new(reader: &mut BufReader<File>, offset: usize) -> Result<Self, SegmentErrorKind> {
-        reader.seek(io::SeekFrom::Start(offset as u64)).map_err(|e| SegmentErrorKind::IOError(e))?;
+        reader
+            .seek(io::SeekFrom::Start(offset as u64))
+            .map_err(|e| SegmentErrorKind::IOError(e))?;
 
-        let mut buffer = [0u8;2];
-        reader.read_exact(&mut buffer).map_err(|e| SegmentErrorKind::IOError(e))?;
+        let mut buffer = [0u8; 2];
+        reader
+            .read_exact(&mut buffer)
+            .map_err(|e| SegmentErrorKind::IOError(e))?;
 
         // 确认标记(0xFF)
         let sign = buffer[0];
@@ -48,24 +55,37 @@ impl Segment {
             0xFE => SegmentType::COM,
             0xC4 => SegmentType::DHT,
             0xDA => {
-                reader.seek(io::SeekFrom::Current(12)).map_err(|e| SegmentErrorKind::IOError(e))?;
-                let scandata_start = reader.stream_position().map_err(|e| SegmentErrorKind::IOError(e))?;
+                reader
+                    .seek(io::SeekFrom::Current(12))
+                    .map_err(|e| SegmentErrorKind::IOError(e))?;
+                let scandata_start = reader
+                    .stream_position()
+                    .map_err(|e| SegmentErrorKind::IOError(e))?;
                 let scandata_end;
 
                 loop {
-                    let mut buffer = [0u8;1];
-                    reader.read_exact(&mut buffer).map_err(|e| SegmentErrorKind::IOError(e))?;
+                    let mut buffer = [0u8; 1];
+                    reader
+                        .read_exact(&mut buffer)
+                        .map_err(|e| SegmentErrorKind::IOError(e))?;
                     if buffer[0] == 0xFF {
-                        reader.read_exact(&mut buffer).map_err(|e| SegmentErrorKind::IOError(e))?;
+                        reader
+                            .read_exact(&mut buffer)
+                            .map_err(|e| SegmentErrorKind::IOError(e))?;
                         if buffer[0] == 0xD9 {
-                            scandata_end = reader.stream_position().map_err(|e| SegmentErrorKind::IOError(e))? - 2;
+                            scandata_end = reader
+                                .stream_position()
+                                .map_err(|e| SegmentErrorKind::IOError(e))?
+                                - 2;
                             break;
                         }
                     }
                 }
-                reader.seek(io::SeekFrom::Start(scandata_start - 12)).map_err(|e| SegmentErrorKind::IOError(e))?;
+                reader
+                    .seek(io::SeekFrom::Start(scandata_start - 12))
+                    .map_err(|e| SegmentErrorKind::IOError(e))?;
                 SegmentType::SOS(scandata_start, scandata_end)
-            },
+            }
             0xDD => SegmentType::DRI,
             0xD9 => SegmentType::EOI,
             n => {
@@ -74,27 +94,43 @@ impl Segment {
                 } else if n >= 0xE0 && n < 0xF0 {
                     SegmentType::APPn(n - 0xE0)
                 } else {
-                    return Err(SegmentErrorKind::InvalidSegmentType)
+                    return Err(SegmentErrorKind::InvalidSegmentType);
                 }
-            },
+            }
         };
         if let SegmentType::SOI = segment_type {
-            return Ok(Self {segment_type: segment_type, length: 0, data: vec![]});
+            return Ok(Self {
+                segment_type: segment_type,
+                length: 0,
+                data: vec![],
+            });
         }
         if let SegmentType::EOI = segment_type {
-            return Ok(Self {segment_type: segment_type, length: 0, data: vec![]});
+            return Ok(Self {
+                segment_type: segment_type,
+                length: 0,
+                data: vec![],
+            });
         }
-        
-        reader.read_exact(&mut buffer).map_err(|e| SegmentErrorKind::IOError(e))?;
+
+        reader
+            .read_exact(&mut buffer)
+            .map_err(|e| SegmentErrorKind::IOError(e))?;
         let length = u16::from_be_bytes([buffer[0], buffer[1]]);
         if length > 65533 {
             return Err(SegmentErrorKind::InvalidSegmentLength);
         }
 
         let mut data = vec![0u8; length as usize - 2];
-        reader.read_exact(&mut data).map_err(|e| SegmentErrorKind::IOError(e))?;
+        reader
+            .read_exact(&mut data)
+            .map_err(|e| SegmentErrorKind::IOError(e))?;
 
-        Ok(Self {segment_type: segment_type, length: length, data: data})
+        Ok(Self {
+            segment_type: segment_type,
+            length: length,
+            data: data,
+        })
     }
 
     pub fn from_file(reader: &mut BufReader<File>) -> Result<Vec<Self>, SegmentErrorKind> {
@@ -103,11 +139,14 @@ impl Segment {
         let mut offset = 0;
         loop {
             let segment = Self::new(reader, offset)?;
-            println!("Segment {}: {{Type:{:?},Length:{}}}", i, segment.segment_type, segment.length);
-            
+            println!(
+                "Segment {}: {{Type:{:?},Length:{}}}",
+                i, segment.segment_type, segment.length
+            );
+
             let _type = segment.segment_type;
 
-            i+=1;
+            i += 1;
             offset += segment.length as usize + 2;
             if let SegmentType::SOS(_, end) = _type {
                 offset = end as usize;

@@ -3,7 +3,7 @@ use std::{collections::HashMap, rc::Rc};
 use frame::Frame;
 use scan::Scan;
 
-use crate::{decode::dct::DCT, dht::HuffmanTable, dqt::Dqt};
+use crate::{dht::HuffmanTable, dqt::Dqt};
 
 pub mod frame;
 pub mod scan;
@@ -24,27 +24,39 @@ pub enum ComponentErrorType {
 }
 
 impl Component {
-    pub fn new(frame: &Frame, dqt_map: HashMap<u8, Rc<Dqt>>,
+    pub fn new(
+        frame: &Frame,
+        dqt_map: HashMap<u8, Rc<Dqt>>,
         dc_map: HashMap<u8, Rc<HuffmanTable>>,
         ac_map: HashMap<u8, Rc<HuffmanTable>>,
         scan_map: Scan,
     ) -> Result<HashMap<u8, Rc<Self>>, ComponentErrorType> {
         let mut map = HashMap::new();
 
-        
         for (id, comp) in scan_map.components {
             let dc_huff = dc_map[&comp.get_dc_id()].clone();
             let ac_huff = ac_map[&comp.get_ac_id()].clone();
             let fcomp = match frame.components.get(&id) {
-                Some(fcomp) => {fcomp},
-                None => {return Err(ComponentErrorType::InvalidFrameId(id));},
+                Some(fcomp) => fcomp,
+                None => {
+                    return Err(ComponentErrorType::InvalidFrameId(id));
+                }
             };
             let qid = fcomp.get_qid();
             let qt = match dqt_map.get(&qid) {
-                Some(qt) => {(*qt).clone()},
-                None => {return Err(ComponentErrorType::InvalidQuantizationId(qid));},
+                Some(qt) => (*qt).clone(),
+                None => {
+                    return Err(ComponentErrorType::InvalidQuantizationId(qid));
+                }
             };
-            let comp = Self {id: id, factor_x: fcomp.get_factor_x(), factor_y: fcomp.get_factor_y(), quantization: qt, dc_huffman_table: dc_huff.clone(), ac_huffman_table: ac_huff.clone()};
+            let comp = Self {
+                id: id,
+                factor_x: fcomp.get_factor_x(),
+                factor_y: fcomp.get_factor_y(),
+                quantization: qt,
+                dc_huffman_table: dc_huff.clone(),
+                ac_huffman_table: ac_huff.clone(),
+            };
             map.insert(comp.id, Rc::new(comp));
         }
 

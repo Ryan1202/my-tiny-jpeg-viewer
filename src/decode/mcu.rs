@@ -1,10 +1,13 @@
-use std::{borrow::BorrowMut, collections::HashMap, error, f32::consts::PI, fs::File, io::BufReader, rc::Rc};
+use std::{
+    borrow::BorrowMut, collections::HashMap, error, fs::File, io::BufReader,
+    rc::Rc,
+};
 
 use ndarray::prelude::*;
 
 use crate::{bitstream::BitStream, component::Component, dht::HuffmanTable, zigzag::ZigZagScan};
 
-use super::dct::{self, DCT};
+use super::dct::DCT;
 
 pub struct MCU {
     pub width: usize,
@@ -15,16 +18,16 @@ pub struct MCU {
 pub struct Block {
     pub width: usize,
     pub height: usize,
-    pub data: Vec<Vec<[[f32;8];8]>>,
+    pub data: Vec<Vec<[[f32; 8]; 8]>>,
 }
 
 fn decode_dct(
     dc: &HuffmanTable,
     last_dc: isize,
     ac: &HuffmanTable,
-    bs: &mut BitStream<BufReader<File>>
+    bs: &mut BitStream<BufReader<File>>,
 ) -> Vec<isize> {
-    let mut code = vec![0isize;64];
+    let mut code = vec![0isize; 64];
     // DC
     let codeval = dc.huff.decode(bs).unwrap();
     let len = codeval as usize;
@@ -37,7 +40,7 @@ fn decode_dct(
         let num = sign << (len - 1) | bs.read(len - 1).unwrap();
         let result;
         if sign == 0 {
-            result = -(((!num) & ((1<<len)-1)) as isize);
+            result = -(((!num) & ((1 << len) - 1)) as isize);
         } else {
             result = num as isize;
         }
@@ -65,14 +68,14 @@ fn decode_dct(
             let num = sign << (len - 1) | bs.read(len - 1).unwrap();
             let result;
             if sign == 0 {
-                result = -(((!num) & ((1<<len)-1)) as isize);
+                result = -(((!num) & ((1 << len) - 1)) as isize);
             } else {
                 result = num as isize;
             }
             i += zero as usize;
             code[i] = result;
         }
-        i+=1;
+        i += 1;
     }
     code
 }
@@ -82,9 +85,7 @@ pub fn decode_blocks(
     comps: HashMap<u8, Rc<Component>>,
     bs: &mut BitStream<BufReader<File>>,
     dct: &DCT,
-    ) -> Result<
-    (Vec<isize>, MCU),
-    Box<dyn error::Error>> {
+) -> Result<(Vec<isize>, MCU), Box<dyn error::Error>> {
     let mut mcu = Vec::new();
 
     let mut max_width = 0;
@@ -103,7 +104,7 @@ pub fn decode_blocks(
 
         let ac_huff = comp.get_ac_huff();
         let dc_huff = comp.get_dc_huff();
-        
+
         let mut dc = last_dc[idx - 1];
 
         for y in 0..height {
@@ -111,11 +112,11 @@ pub fn decode_blocks(
                 let code = decode_dct(&*dc_huff, dc, &*ac_huff, bs);
                 dc = code[0];
 
-                let arr = Array2::from_shape_vec((8,8), code).unwrap();
+                let arr = Array2::from_shape_vec((8, 8), code).unwrap();
                 let dqt = &*comp.get_dqt().borrow_mut().table.clone();
                 let arr = &arr * dqt;
 
-                let mut result = [[0f32;8]; 8];
+                let mut result = [[0f32; 8]; 8];
                 let zigzag = ZigZagScan::new(8);
                 let (mut x1, mut y1) = (0, 0);
                 for (x2, y2) in zigzag {
@@ -126,12 +127,23 @@ pub fn decode_blocks(
                         y1 += 1;
                     }
                 }
-                
+
                 block[y][x] = dct.idct2d(result);
             }
         }
         last_dc[idx - 1] = dc;
-        mcu.push(Block { width: width, height: height, data: block });
+        mcu.push(Block {
+            width: width,
+            height: height,
+            data: block,
+        });
     }
-    Ok((last_dc, MCU { data: mcu, width: max_width, height: max_height }))
+    Ok((
+        last_dc,
+        MCU {
+            data: mcu,
+            width: max_width,
+            height: max_height,
+        },
+    ))
 }

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 pub struct Scan {
-    pub components: HashMap<u8, ScanComponent>
+    pub components: HashMap<u8, ScanComponent>,
 }
 
 pub struct ScanComponent {
@@ -12,7 +12,11 @@ pub struct ScanComponent {
 
 impl ScanComponent {
     fn new(frame_comp_id: u8, dc_id: u8, ac_id: u8) -> Self {
-        Self { frame_comp_id: frame_comp_id, dc_id: dc_id, ac_id: ac_id }
+        Self {
+            frame_comp_id: frame_comp_id,
+            dc_id: dc_id,
+            ac_id: ac_id,
+        }
     }
 
     pub fn get_id(&self) -> u8 {
@@ -41,6 +45,8 @@ impl Scan {
             components.insert(comp.get_id(), comp);
         }
 
-        Self { components: components }
+        Self {
+            components: components,
+        }
     }
 }

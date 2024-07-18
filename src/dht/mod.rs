@@ -1,3 +1,5 @@
+use std::{collections::HashMap, rc::Rc};
+
 use huffman::{Huffman, HuffmanErrorType};
 
 pub mod huffman;
@@ -14,13 +16,49 @@ pub struct HuffmanTable {
 }
 
 impl HuffmanTable {
-    pub fn new(data: Vec<u8>) -> Result<Self, HuffmanErrorType> {
-        let num = data[0] & 0x0f;
-        let ht_type = if data[0] & 0x10 == 0x10 {HuffmanTableType::AC} else {HuffmanTableType::DC};
+    pub fn new(
+        dc_map: &mut HashMap<u8, Rc<HuffmanTable>>,
+        ac_map: &mut HashMap<u8, Rc<HuffmanTable>>,
+        length: u16,
+        data: Vec<u8>,
+    ) -> Result<(), HuffmanErrorType> {
+        let len = length as usize - 2;
+        let mut offset = 0 as usize;
 
-        let huffman = Huffman::parse(data)?;
+        while offset < len {
+            let num = data[offset] & 0x0f;
+            let ht_type = if data[offset] & 0x10 == 0x10 {
+                HuffmanTableType::AC
+            } else {
+                HuffmanTableType::DC
+            };
+            let (huffman, off) = Huffman::parse(&data, offset)?;
+            match ht_type {
+                HuffmanTableType::DC => {
+                    dc_map.insert(
+                        num,
+                        Rc::new(HuffmanTable {
+                            id: num,
+                            ht_type: ht_type,
+                            huff: huffman,
+                        }),
+                    );
+                }
+                HuffmanTableType::AC => {
+                    ac_map.insert(
+                        num,
+                        Rc::new(HuffmanTable {
+                            id: num,
+                            ht_type: ht_type,
+                            huff: huffman,
+                        }),
+                    );
+                }
+            }
+            offset = off;
+        }
 
-        Ok(HuffmanTable { id: num, ht_type: ht_type, huff: huffman })
+        Ok(())
     }
 
     pub fn id(&self) -> u8 {
