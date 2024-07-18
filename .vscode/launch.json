@@ -1,0 +1,64 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'my_tiny_jpeg_decoder'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=my-tiny-jpeg-decoder"
+                ],
+                "filter": {
+                    "name": "my_tiny_jpeg_decoder",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'my-tiny-jpeg-decoder'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=my-tiny-jpeg-decoder",
+                    "--package=my-tiny-jpeg-decoder"
+                ],
+                "filter": {
+                    "name": "my-tiny-jpeg-decoder",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'my-tiny-jpeg-decoder'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=my-tiny-jpeg-decoder",
+                    "--package=my-tiny-jpeg-decoder"
+                ],
+                "filter": {
+                    "name": "my-tiny-jpeg-decoder",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+[package]
+name = "my-tiny-jpeg-decoder"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bench]]
+name = "bench"
+harness = false
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+[dependencies]
+iced = { version = "0.12.1", features = ["image"] }
+ndarray = "0.15.6"
+rfd = "0.14.1"
