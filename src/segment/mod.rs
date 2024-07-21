@@ -139,10 +139,10 @@ impl Segment {
         let mut offset = 0;
         loop {
             let segment = Self::new(reader, offset)?;
-            println!(
-                "Segment {}: {{Type:{:?},Length:{}}}",
-                i, segment.segment_type, segment.length
-            );
+            // println!(
+            //     "Segment {}: {{Type:{:?},Length:{}}}",
+            //     i, segment.segment_type, segment.length
+            // );
 
             let _type = segment.segment_type;
 

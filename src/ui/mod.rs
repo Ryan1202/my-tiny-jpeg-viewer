@@ -2,7 +2,7 @@ use iced::widget::{column, image, Button, Image};
 use iced::{Command, Element};
 use rfd::FileDialog;
 
-use crate::get_jpeg_image;
+use crate::get_jpeg_image_async;
 
 pub struct App {
     pixels: image::Handle,
@@ -59,7 +59,7 @@ impl iced::Application for App {
                 {
                     self.img_path = res.display().to_string();
                 }
-                Command::perform(get_jpeg_image(self.img_path.clone()), Message::FileDecoded)
+                Command::perform(get_jpeg_image_async(self.img_path.clone()), Message::FileDecoded)
             }
             Message::FileDecoded((width, height, pixbuf)) => {
                 self.pixels = image::Handle::from_pixels(width as u32, height as u32, pixbuf);

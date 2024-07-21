@@ -59,27 +59,39 @@ pub fn decode_mcu(
             let cr_factor_x = mcu.width / block_cr.width;
             let cr_factor_y = mcu.height / block_cr.height;
 
-            let y_off_x = x0 * 8 / y_factor_x;
-            let y_off_y = y0 * 8 / y_factor_y;
-            let cb_off_x = x0 * 8 / cb_factor_x;
-            let cb_off_y = y0 * 8 / cb_factor_y;
-            let cr_off_x = x0 * 8 / cr_factor_x;
-            let cr_off_y = y0 * 8 / cr_factor_y;
+            let y_width = 8 / y_factor_x;
+            let y_height = 8 / y_factor_y;
+            let cb_width = 8 / cb_factor_x;
+            let cb_height = 8 / cb_factor_y;
+            let cr_width = 8 / cr_factor_x;
+            let cr_height = 8 / cr_factor_y;
+
+            let y_off_x = (x0 * y_width) % 8;
+            let y_off_y = y0 * y_height;
+            let cb_off_x = (x0 * cb_width) % 8;
+            let cb_off_y = y0 * cb_height;
+            let cr_off_x = (x0 * cr_width) % 8;
+            let cr_off_y = y0 * cr_height;
 
             for y1 in 0..8 {
-                let mut offset = block_base + (y1 * mcu.width * 8) * 4;
-                for x1 in 0..8 {
-                    let (r, g, b) = ycbcr2rgb(
-                        y[(y_off_y + y1 / y_factor_y) % 8][(y_off_x + x1 / y_factor_x) % 8],
-                        cb[(cb_off_y + y1 / cb_factor_y) % 8][(cb_off_x + x1 / cb_factor_x) % 8],
-                        cr[(cr_off_y + y1 / cr_factor_y) % 8][(cr_off_x + x1 / cr_factor_x) % 8],
-                    );
-                    buffer[offset + 0] = r;
-                    buffer[offset + 1] = g;
-                    buffer[offset + 2] = b;
-                    buffer[offset + 3] = 0xff;
-                    offset += 4;
-                }
+                let offset = block_base + (y1 * mcu.width * 8) * 4;
+                ycbcr2rgb(
+                    &y[(y_off_y + y1 / y_factor_y) % 8][y_off_x..(y_off_x + y_width)], y_factor_x,
+                    &cb[(cb_off_y + y1 / cb_factor_y) % 8][cb_off_x..(cb_off_x + cb_width)], cb_factor_x,
+                    &cr[(cr_off_y + y1 / cr_factor_y) % 8][cr_off_x..(cr_off_x + cr_width)], cr_factor_x,
+                    &mut buffer[offset..(offset + 32)]);
+                // for x1 in 0..8 {
+                //     let (r, g, b) = ycbcr2rgb(
+                //         y[(y_off_y + y1 / y_factor_y) % 8][(y_off_x + x1 / y_factor_x) % 8],
+                //         cb[(cb_off_y + y1 / cb_factor_y) % 8][(cb_off_x + x1 / cb_factor_x) % 8],
+                //         cr[(cr_off_y + y1 / cr_factor_y) % 8][(cr_off_x + x1 / cr_factor_x) % 8],
+                //     );
+                //     buffer[offset + 0] = r;
+                //     buffer[offset + 1] = g;
+                //     buffer[offset + 2] = b;
+                //     buffer[offset + 3] = 0xff;
+                //     offset += 4;
+                // }
             }
         }
     }

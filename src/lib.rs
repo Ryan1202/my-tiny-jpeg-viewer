@@ -28,7 +28,11 @@ pub mod segment;
 pub mod ui;
 pub mod zigzag;
 
-pub async fn get_jpeg_image(path: String) -> (usize, usize, Vec<u8>) {
+pub async fn get_jpeg_image_async(path: String) -> (usize, usize, Vec<u8>) {
+    get_jpeg_image(path)
+}
+
+pub fn get_jpeg_image(path: String) -> (usize, usize, Vec<u8>) {
     let jpg_file = File::open(path).expect("打开文件失败！");
     // let jpg_file = File::open("s11138117.jpg").expect("打开文件失败！");
     let mut reader = BufReader::new(jpg_file);
@@ -59,7 +63,7 @@ pub async fn get_jpeg_image(path: String) -> (usize, usize, Vec<u8>) {
                     _if.push(InterchangeFormat::new(n, &ele));
                 }
                 _ => {
-                    println!("不支持的段类型: APP{} !", n);
+                    // println!("不支持的段类型: APP{} !", n);
                 }
             },
             SegmentType::DQT => {
@@ -108,7 +112,7 @@ pub async fn get_jpeg_image(path: String) -> (usize, usize, Vec<u8>) {
                 restart_interval = Some(u16::from_be_bytes([ele.data[0], ele.data[1]]));
             }
             _ => {
-                println!("不支持的段类型!");
+                // println!("不支持的段类型!");
             }
         }
     }

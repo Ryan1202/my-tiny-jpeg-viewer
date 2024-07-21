@@ -16,3 +16,9 @@ criterion = "0.5.1"
 iced = { version = "0.12.1", features = ["image"] }
 ndarray = "0.15.6"
 rfd = "0.14.1"
+
+[build]
+rustflags = ["-C", "symbol-mangling-version=v0"]
+
+[profile.release]
+debug = true

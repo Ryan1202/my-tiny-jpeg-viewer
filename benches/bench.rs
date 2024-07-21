@@ -7,11 +7,7 @@ fn bench(c: &mut Criterion) {
     let mut group = c.benchmark_group("bench");
     group.bench_function("bench", |b| {
         b.iter(|| {
-            async {
-                _ = get_jpeg_image("s11138117.jpg".to_string())
-                    .into_future()
-                    .await;
-            };
+            get_jpeg_image("s11138117.jpg".to_string())
         })
     });
     group.finish();

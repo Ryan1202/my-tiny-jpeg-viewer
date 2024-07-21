@@ -42,7 +42,7 @@ impl DCT {
         tmp
     }
 
-    #[cfg(target_arch = "x86_64")]
+    #[cfg(target_feature = "avx")]
     fn fmd_simd(&self, data: [[f32; 8]; 8], i: usize, j: usize) -> f32 {
         use std::arch::x86_64::*;
 
@@ -59,12 +59,32 @@ impl DCT {
             let mut result = [0.0; 8];
             acc = _mm256_hadd_ps(acc, acc);
             acc = _mm256_hadd_ps(acc, acc);
-            _mm256_storeu_ps(&mut result[0], acc);
+            _mm256_store_ps(&mut result[0], acc);
             result[0] + result[4]
         }
     }
 
-    #[cfg(not(target_arch = "x86_64"))]
+    #[cfg(all(not(target_feature = "avx"), target_feature = "sse2"))]
+    fn fmd_simd(&self, data: [[f32; 8]; 8], i: usize, j: usize) -> f32 {
+        use std::arch::x86_64::*;
+        
+        unsafe {
+            let mut acc = _mm_set1_ps(0.0);
+            let mut result = [0.0; 4];
+            for x in 0..8 {
+                let al = _mm_load_ps(&self.idct2d_data[i][j][x][0]);
+                let ah = _mm_load_ps(&self.idct2d_data[i][j][x][4]);
+                let bl = _mm_loadu_ps(&data[x][0]);
+                let bh = _mm_loadu_ps(&data[x][4]);
+                let sum = _mm_add_ps(_mm_mul_ps(al, bl), _mm_mul_ps(ah, bh));
+                acc = _mm_add_ps(acc, sum);
+            }
+            _mm_storeu_ps(&mut result[0], acc);
+            result[0] + result[1] + result[2] + result[3]
+        }
+    }
+
+    #[cfg(all(not(target_feature = "avx"), not(target_feature = "sse2")))]
     fn fmd_simd(&self, data: [[f32; 8]; 8], i: usize, j: usize) -> f32 {
         let mut tmp = 0.0;
         for x in 0..8 {
