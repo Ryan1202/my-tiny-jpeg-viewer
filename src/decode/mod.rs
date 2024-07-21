@@ -1,8 +1,9 @@
-use std::{collections::HashMap, error, fs::File, io::BufReader, rc::Rc, vec};
+use std::{error, fs::File, io::BufReader, rc::Rc, vec};
 
 use chroma::ycbcr2rgb;
 use dct::DCT;
 use mcu::decode_blocks;
+use rustc_hash::FxHashMap;
 
 use crate::{
     bitstream::BitStream,
@@ -20,7 +21,7 @@ pub struct Coordinate {
 
 pub fn decode_mcu(
     last_dc: Vec<isize>,
-    comps: HashMap<u8, Rc<Component>>,
+    comps: FxHashMap<u8, Rc<Component>>,
     bs: &mut BitStream<BufReader<File>>,
     dct: &DCT,
 ) -> Result<(Vec<isize>, Vec<u8>), Box<dyn error::Error>> {
@@ -100,7 +101,7 @@ pub fn decode_mcu(
 
 pub fn decode_image(
     frame: &Frame,
-    comps: HashMap<u8, Rc<Component>>,
+    comps: FxHashMap<u8, Rc<Component>>,
     bs: &mut BitStream<BufReader<File>>,
     restart_interval: Option<u16>,
     dct: DCT,

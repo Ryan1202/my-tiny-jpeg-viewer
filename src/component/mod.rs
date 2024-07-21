@@ -1,6 +1,7 @@
-use std::{collections::HashMap, rc::Rc};
+use std::rc::Rc;
 
 use frame::Frame;
+use rustc_hash::FxHashMap;
 use scan::Scan;
 
 use crate::{dht::HuffmanTable, dqt::Dqt};
@@ -26,12 +27,12 @@ pub enum ComponentErrorType {
 impl Component {
     pub fn new(
         frame: &Frame,
-        dqt_map: HashMap<u8, Rc<Dqt>>,
-        dc_map: HashMap<u8, Rc<HuffmanTable>>,
-        ac_map: HashMap<u8, Rc<HuffmanTable>>,
+        dqt_map: FxHashMap<u8, Rc<Dqt>>,
+        dc_map: FxHashMap<u8, Rc<HuffmanTable>>,
+        ac_map: FxHashMap<u8, Rc<HuffmanTable>>,
         scan_map: Scan,
-    ) -> Result<HashMap<u8, Rc<Self>>, ComponentErrorType> {
-        let mut map = HashMap::new();
+    ) -> Result<FxHashMap<u8, Rc<Self>>, ComponentErrorType> {
+        let mut map = FxHashMap::default();
 
         for (id, comp) in scan_map.components {
             let dc_huff = dc_map[&comp.get_dc_id()].clone();

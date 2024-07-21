@@ -1,7 +1,8 @@
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
+
 
 pub struct Scan {
-    pub components: HashMap<u8, ScanComponent>,
+    pub components: FxHashMap<u8, ScanComponent>,
 }
 
 pub struct ScanComponent {
@@ -34,7 +35,7 @@ impl ScanComponent {
 
 impl Scan {
     pub fn new(data: Vec<u8>) -> Self {
-        let mut components = HashMap::new();
+        let mut components = FxHashMap::default();
         let comp_nr = data[0] as usize;
 
         for i in 0..comp_nr {

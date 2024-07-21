@@ -1,9 +1,10 @@
 use std::{
-    borrow::BorrowMut, collections::HashMap, error, fs::File, io::BufReader,
+    borrow::BorrowMut, error, fs::File, io::BufReader,
     rc::Rc,
 };
 
 use ndarray::prelude::*;
+use rustc_hash::FxHashMap;
 
 use crate::{bitstream::BitStream, component::Component, dht::HuffmanTable, zigzag::ZigZagScan};
 
@@ -82,7 +83,7 @@ fn decode_dct(
 
 pub fn decode_blocks(
     mut last_dc: Vec<isize>,
-    comps: HashMap<u8, Rc<Component>>,
+    comps: FxHashMap<u8, Rc<Component>>,
     bs: &mut BitStream<BufReader<File>>,
     dct: &DCT,
 ) -> Result<(Vec<isize>, MCU), Box<dyn error::Error>> {

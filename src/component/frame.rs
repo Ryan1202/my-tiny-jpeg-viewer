@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
+
 
 #[derive(Clone, Copy)]
 pub enum FrameTypeCoding {
@@ -18,7 +19,7 @@ pub struct Frame {
     _sample_precision: u8,
     height: u16,
     width: u16,
-    pub components: HashMap<u8, FrameComponent>,
+    pub components: FxHashMap<u8, FrameComponent>,
 }
 pub struct FrameComponent {
     id: u8,
@@ -37,7 +38,7 @@ impl Frame {
         let height = u16::from_be_bytes([data[1], data[2]]);
         let width = u16::from_be_bytes([data[3], data[4]]);
         let comp_nr = data[5] as usize;
-        let mut v = HashMap::with_capacity(comp_nr as usize);
+        let mut v = FxHashMap::default();
         for i in 0..comp_nr {
             let comp = FrameComponent::new(data[i * 3 + 6], data[i * 3 + 7], data[i * 3 + 8]);
             v.insert(comp.get_id(), comp);

@@ -1,5 +1,4 @@
 use std::{
-    collections::HashMap,
     fs::File,
     io::{BufReader, Seek},
     path::Path,
@@ -16,6 +15,7 @@ use component::{
 use decode::dct::DCT;
 use dht::{huffman::HuffmanErrorType, HuffmanTable};
 use dqt::Dqt;
+use rustc_hash::FxHashMap;
 use segment::{Segment, SegmentType};
 
 pub mod application;
@@ -44,9 +44,9 @@ pub fn get_jpeg_image(path: String) -> (usize, usize, Vec<u8>) {
     };
 
     let mut _if = Vec::new();
-    let mut dqt_map = HashMap::new();
-    let mut dc_map = HashMap::new();
-    let mut ac_map = HashMap::new();
+    let mut dqt_map = FxHashMap::default();
+    let mut dc_map = FxHashMap::default();
+    let mut ac_map = FxHashMap::default();
     let mut frame = None;
     let mut scan = None;
     let mut st = None;

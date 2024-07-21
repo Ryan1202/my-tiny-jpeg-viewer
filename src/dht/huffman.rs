@@ -1,11 +1,13 @@
-use std::{collections::HashMap, fs::File, io::BufReader};
+use std::{fs::File, io::BufReader};
+
+use rustc_hash::FxHashMap;
 
 use crate::bitstream::{Binary, BitStream, BitStreamErrorType};
 
 #[derive(Debug)]
 pub struct Huffman {
     _length: [u8; 16],
-    map: HashMap<Binary, u8>,
+    map: FxHashMap<Binary, u8>,
 }
 
 #[derive(Debug)]
@@ -22,7 +24,7 @@ impl Huffman {
         let mut val: Vec<Vec<u8>> = Vec::with_capacity(16);
         let mut off = offset + 17;
         let mut code = 0usize;
-        let mut map = HashMap::new();
+        let mut map = FxHashMap::default();
 
         for i in 0..16 {
             length[i] = data[offset + i + 1];

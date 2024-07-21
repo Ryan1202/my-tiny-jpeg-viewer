@@ -1,6 +1,7 @@
-use std::{collections::HashMap, rc::Rc};
+use std::rc::Rc;
 
 use huffman::{Huffman, HuffmanErrorType};
+use rustc_hash::FxHashMap;
 
 pub mod huffman;
 
@@ -17,8 +18,8 @@ pub struct HuffmanTable {
 
 impl HuffmanTable {
     pub fn new(
-        dc_map: &mut HashMap<u8, Rc<HuffmanTable>>,
-        ac_map: &mut HashMap<u8, Rc<HuffmanTable>>,
+        dc_map: &mut FxHashMap<u8, Rc<HuffmanTable>>,
+        ac_map: &mut FxHashMap<u8, Rc<HuffmanTable>>,
         length: u16,
         data: Vec<u8>,
     ) -> Result<(), HuffmanErrorType> {

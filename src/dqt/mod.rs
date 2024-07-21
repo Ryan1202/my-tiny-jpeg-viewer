@@ -1,6 +1,7 @@
 use core::fmt;
 use ndarray::{prelude::*, OwnedRepr, ShapeError};
-use std::{collections::HashMap, rc::Rc};
+use rustc_hash::FxHashMap;
+use std::rc::Rc;
 
 use crate::zigzag::ZigZagScan;
 
@@ -38,7 +39,7 @@ impl fmt::Display for Dqt {
 
 impl Dqt {
     pub fn new(
-        map: &mut HashMap<u8, Rc<Dqt>>,
+        map: &mut FxHashMap<u8, Rc<Dqt>>,
         length: u16,
         data: Vec<u8>,
     ) -> Result<(), ShapeError> {
