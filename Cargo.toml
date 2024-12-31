@@ -19,7 +19,7 @@ rfd = "0.14.1"
 rustc-hash = "2.0.0"
 
 [build]
-rustflags = ["-C", "symbol-mangling-version=v0"]
+rustflags = ["-C", "symbol-mangling-version=v0", "target-feature=+avx"]
 
 [profile.release]
 debug = true
