@@ -6,9 +6,8 @@ use my_tiny_jpeg_decoder::get_jpeg_image;
 fn bench(c: &mut Criterion) {
     let mut group = c.benchmark_group("jpeg_decode_bench");
     group.bench_function("jpeg_decode", |b| {
-        let iterations = 5;
         b.iter(|| {
-            get_jpeg_image("Rheinfall 6x17.jpg".to_string());
+            get_jpeg_image("Rheinfall.jpg".to_string());
         })
     });
     group.finish();

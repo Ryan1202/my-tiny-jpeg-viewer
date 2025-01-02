@@ -27,8 +27,8 @@ fn decode_dct(
     last_dc: isize,
     ac: &HuffmanTable,
     bs: &mut BitStream<BufReader<File>>,
-) -> Vec<isize> {
-    let mut code = vec![0isize; 64];
+) -> [isize; 64] {
+    let mut code = [0isize; 64];
     // DC
     let codeval = dc.huff.decode(bs).unwrap();
     let len = codeval as usize;
@@ -113,7 +113,7 @@ pub fn decode_blocks(
                 let code = decode_dct(&*dc_huff, dc, &*ac_huff, bs);
                 dc = code[0];
 
-                let arr = Array2::from_shape_vec((8, 8), code).unwrap();
+                let arr = Array2::from_shape_vec((8, 8), code.to_vec()).unwrap();
                 let dqt = &*comp.get_dqt().borrow_mut().table.clone();
                 let arr = &arr * dqt;
 
